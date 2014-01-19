@@ -8,7 +8,7 @@ class SeqKMeans:
     self.trainPts = trainPts
     self.numClusters = numClusters
     #self.trainMeans()
-    self.trainMeansGrowing()
+    #self.trainMeansGrowing()
 
   #Make new clusters when none is close enough
   def trainMeansGrowing(self):
@@ -69,7 +69,7 @@ class SeqKMeans:
     for n in range(N):
       #print np.sum(self.means)
       closestCluster = self.classify(Ts[n])
-      print "Assigned to {}".format(closestCluster)
+      #print "Assigned to {}".format(closestCluster)
       self.weights[closestCluster] += 1
       
       delta = (1.0 / self.weights[closestCluster]) * (Ts[n] - self.means[closestCluster])
