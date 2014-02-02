@@ -28,9 +28,9 @@ class NeuralNet:
     # and picking the class that has the most # of neurons with dot product > theta
     return np.argmax(np.sum(np.dot(self.synapses,x) > self.theta, 1))
 
-  def trainOnSet(self, trainData):
+  def trainOnSet(self, trainData, numIterations):
     synapses = self.synapses
-    T = 5000
+    T = numIterations
     for t in range(T):
       print t
       exNum = randrange(len(trainData))
@@ -67,12 +67,12 @@ class NeuralNet:
 
 
 
-def testNeuralNet():
+def testNeuralNet(numIterations):
   trainData = df.labeled(df.flatPixelTrainData())
   testData = df.flatPixelTestData().reshape(10,1000,900)
 
   net = NeuralNet()
-  net.trainOnSet(trainData)
+  net.trainOnSet(trainData, numIterations)
   net.testOnSet(testData)
 
 
