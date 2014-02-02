@@ -19,7 +19,7 @@ class NeuralNet:
 
   def __init__(self):
     # Initialize synapse array to correct shape
-    self.synapses = np.zeros((self.C,self.N,self.D))
+    self.synapses = np.zeros((self.C, self.N, self.D))
 
   # Using our synapse weights, classify x as one of the C classes
   def classify(self, x):
@@ -28,23 +28,50 @@ class NeuralNet:
     # and picking the class that has the most # of neurons with dot product > theta
     return np.argmax(np.sum(np.dot(self.synapses,x) > self.theta, 1))
 
+  #trainData must be "labeled" - see digit_features.py
   def trainOnSet(self, trainData, numIterations):
     synapses = self.synapses
     T = numIterations
+    numTrainPts = len(trainData)
+
     for t in range(T):
       print t
-      exNum = randrange(len(trainData))
-      (x,d) = trainData[exNum]
-      
-      for c in range(self.C):
-        for n in range(self.N):
-          totalField = np.dot(x,synapses[c][n])
-          for i in range(self.D):
-            if x[i] == 1:
-              if (d == c) and synapses[c][n][i] < 1 and (totalField < self.theta + self.delta):
-                if random() < self.transP: synapses[c][n][i] += 1
-              if (d != c) and synapses[c][n][i] > -1 and (totalField > self.theta - self.delta):
-                if random() < self.transP: synapses[c][n][i] -= 1
+      # At every sweep through the training points, shuffle the order
+      if t % numTrainPts == 0: np.random.shuffle(trainData)
+      (x,d) = trainData[t % numTrainPts]
+
+      # We can increment a synapse if it's not maxed out, and vice versa
+      canIncrement = self.synapses < 1
+      canDecrement = self.synapses > -1
+
+      # Duplicate the input vector C*N times (once per neuron)
+      inputIsOn = np.ones((self.C, self.N, self.D)) * x
+
+      # 1 for every synapse of neurons matching the current training point,
+      # 0 otherwise
+      sameClass = np.zeros((self.C, self.N, self.D))
+      sameClass[d] = np.ones((self.N, self.D))
+
+      # A neuron's field is the dot product of synapses times input vector
+      fields = np.inner(x, synapses).reshape(self.C, self.N, 1)
+      # Must have low field to consider incrementing synapse weights
+      lowField = (fields < self.theta + self.delta) 
+      lowField = lowField * np.ones((self.C, self.N, self.D))
+      # Must have high field to consider decrementing synapse weights
+      highField = (fields > self.theta - self.delta) 
+      highField = highField * np.ones((self.C, self.N, self.D))
+
+      # Only change synapse weights with probability transP, assuming
+      # the other conditions are met
+      rands = np.random.random((self.C, self.N, self.D)) < self.transP
+
+      synapsePluses = inputIsOn * sameClass * canIncrement * lowField * rands
+      synapseMinuses = inputIsOn * (1 - sameClass) * canDecrement * highField * rands
+
+      # Increment synapses meeting incrementation conditions (see above)
+      synapses += synapsePluses
+      # Decrement synapses meeting decrementation conditions (see above)
+      synapses -= synapseMinuses
 
   def testOnSet(self, testData):
     synapses = self.synapses
@@ -74,5 +101,6 @@ def testNeuralNet(numIterations):
   net = NeuralNet()
   net.trainOnSet(trainData, numIterations)
   net.testOnSet(testData)
+  return net
 
 
