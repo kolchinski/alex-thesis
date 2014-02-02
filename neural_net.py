@@ -64,73 +64,15 @@ class NeuralNet:
     print "Total error: ", 100*totalErrors/totalTestPoints, "%"
 
 
-trainData = df.labeled(df.flatPixelTrainData())
-testData = df.flatPixelTestData().reshape(10,1000,900)
-
-net = NeuralNet()
-net.trainOnSet(trainData)
-net.testOnSet(testData)
-
-
-##C is num digits, N num neurons per class, D num features per example
-#N = 10
-#theta = 0
-#delta = 1 
-#transP = 0.01
-#D = 900
-#C = 10
-#synapses = np.zeros((C,N,D))
-#
-#
-#
-#T = 100
-#for t in range(T):
-#  print t
-#  exNum = randrange(len(trainData))
-#  (x,d) = trainData[exNum]
-#  
-#  for c in range(C):
-#    for n in range(N):
-#      totalField = np.dot(x,synapses[c][n])
-#      for i in range(D):
-#        if x[i] == 1:
-#          if (d == c) and synapses[c][n][i] < 1 and (totalField < theta + delta):
-#            if random() < transP: synapses[c][n][i] += 1
-#          if (d != c) and synapses[c][n][i] > -1 and (totalField > theta - delta):
-#            if random() < transP: synapses[c][n][i] -= 1
-#
-#
-#
-#def classify(x, synapses):
-#  # Classify the vector by taking the dot product with each set of synapses,
-#  # and picking the class that has the most # of neurons with dot product > theta
-#  return np.argmax(np.sum(np.dot(synapses,x) > theta, 1))
-#  
-#
-#
-#totalErrors = 0
-#totalTestPoints = 0
-#for c in range(C):
-#  numErrors = 0
-#  numTestPoints = len(testData[c])
-#  totalTestPoints += numTestPoints
-#  for i in range(numTestPoints):
-#    if not classify(testData[c][i], synapses) == c:
-#      numErrors += 1
-#      totalErrors += 1
-#  print "Character ", c, ": ", numErrors, " errors out of ", numTestPoints, "; ", 100*numErrors/numTestPoints, " % error"
-#
-#print "Total error: ", 100*totalErrors/totalTestPoints, "%"
-#
 
 
 
+def testNeuralNet():
+  trainData = df.labeled(df.flatPixelTrainData())
+  testData = df.flatPixelTestData().reshape(10,1000,900)
 
-
-
-
-
-
-
+  net = NeuralNet()
+  net.trainOnSet(trainData)
+  net.testOnSet(testData)
 
 
