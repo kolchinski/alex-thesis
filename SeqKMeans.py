@@ -11,7 +11,7 @@ class SeqKMeans:
     #self.trainMeansGrowing()
 
   #Make new clusters when none is close enough
-  #This doesn't work very well
+  #This doesn't work very well - better to focus on mixed number of clusters
   def trainMeansGrowing(self):
     Ts = self.trainPts
     np.random.shuffle(Ts)
