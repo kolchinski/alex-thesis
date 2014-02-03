@@ -66,32 +66,24 @@ class SeqKMeans:
     graphEvery = N / numGraphSteps
 
     plt.close('all')
+    fig, axes = plt.subplots(numGraphSteps, K, figsize=(10,10)) 
+
     np.random.shuffle(Ts)
     for n in range(N):
-      #print np.sum(self.means)
       closestCluster = self.classify(Ts[n])
-      #print "Assigned to {}".format(closestCluster)
       self.weights[closestCluster] += 1
       
       delta = (1.0 / self.weights[closestCluster]) * (Ts[n] - self.means[closestCluster])
       #delta = (Ts[n] - self.means[closestCluster])
-      #print delta.dtype
-      #print np.sum(delta)
-      #print "\n"
 
       self.means[closestCluster] += delta  
-      #print np.sum(delta)
       if n % graphEvery == 0:
         for i in range(K):
           curMean = np.copy(self.means[i])
-          plt.subplot(numGraphSteps,K,n / graphEvery * K + i + 1)
-          plt.imshow(curMean.reshape(s,s), cmap='bone')
-      #if n in range(numGraphSteps):
-      #  for i in range(K):
-      #    curMean = np.copy(self.means[i])
-      #    plt.subplot(numGraphSteps,K,n * K + i + 1)
-      #    plt.imshow(curMean.reshape(s,s), cmap='bone')
-
+          curAxes = axes[n/graphEvery, i]
+          curAxes.xaxis.set_ticks([])
+          curAxes.yaxis.set_ticks([])
+          curAxes.imshow(curMean.reshape(s,s), cmap='bone')
 
     print "Points per cluster: ", self.weights
     plt.show()
@@ -105,13 +97,14 @@ class SeqKMeans:
   def dists_to_means(self,p):
     return np.apply_along_axis(np.linalg.norm,1,self.means-p)
 
-
   def showClusters(self):
     sideLength = np.sqrt(len(self.trainPts[0]))
     clusterGrids = self.means.reshape(self.numClusters,sideLength,sideLength)
     plt.close('all')
     for i in range(self.numClusters):
       plt.subplot(1,10,i+1)
+      plt.gca().axes.get_xaxis().set_ticks([])
+      plt.gca().axes.get_yaxis().set_ticks([])
       plt.imshow(clusterGrids[i], cmap='bone')
     plt.show()
 
@@ -134,4 +127,6 @@ class SeqKMeans:
     #print "Overall error rate: {}".format(errorRates.mean())
     print classifications
 
-
+import digit_features as df
+skm1 = SeqKMeans(df.flatPixelTrainData(),10)
+skm1.trainMeans()
