@@ -102,18 +102,16 @@ class PegasosSVM:
     plt.show()
 
 
-unlabeledTrainData = df.flatEdgeTrainData()
-unlabeledTestData = df.flatEdgeTestData()
-trainData = df.labeled(unlabeledTrainData)
-testData = df.labeled(unlabeledTestData)
-
-
 def testPegasos():
+  unlabeledTrainData = df.flatEdgeTrainData()
+  unlabeledTestData = df.flatEdgeTestData()
+  trainData = df.labeled(unlabeledTrainData)
+  testData = df.labeled(unlabeledTestData)
   peg = PegasosSVM()
   peg.trainOnSet(trainData,unlabeledTrainData,8000)
   peg.testOnSet(testData)
   peg.displayWeights()
   peg.showProductHistogram(unlabeledTestData)
   return peg
-peg = testPegasos()
+#peg = testPegasos()
 
