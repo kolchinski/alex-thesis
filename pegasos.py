@@ -31,6 +31,8 @@ class PegasosSVM:
     for c in range(self.C):
       print "\nTraining one-vs-rest SVM for class {}".format(c)
       for t in range(1, T + 1):
+
+        #Every 10% of training points, print out total loss
         if t % (T/10) == 0: 
           weightPenalty = self.l / 2.0 * np.linalg.norm(W[c])**2
           dotProducts = np.inner(unlabeledTrainData, W[c])
