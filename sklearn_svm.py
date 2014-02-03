@@ -1,5 +1,4 @@
 from sklearn import svm
-import digit_features as df
 import numpy as np
 
 # Quadratic time since pairwise SVMs - implemented with libSVM
