@@ -6,7 +6,6 @@ import digit_features as df
 
 class PegasosSVM:
   l = 0.5 # learning rate
-  k = 1   # number of points to train at a time (doesn't really matter)
   C = 10  # Number of classes
 
   def __init__(self):
@@ -31,6 +30,8 @@ class PegasosSVM:
     for c in range(self.C):
       print "\nTraining one-vs-rest SVM for class {}".format(c)
       for t in range(1, T + 1):
+        # Every full sweep through the training points, shuffle their order
+        if t % S == 0: np.random.shuffle(trainData)
 
         #Every 10% of training points, print out total loss
         if t % (T/10) == 0: 
@@ -44,15 +45,15 @@ class PegasosSVM:
           totalLoss = weightPenalty + avgLoss
           print "Total loss: {}".format(totalLoss)
 
-        AsubT = trainData[sample(range(S),self.k)]
+        AsubT = trainData[t%S]
         #etaT = 1.0 / l / (t*5 + 1)
         etaT = 1.0 / self.l / (t + 1)
         W[c] *= 1.0 * (t - 1) / t
-        for i in range(self.k):
-          (x,d) = AsubT[i]
-          y = 1 if (d == c) else -1
-          if np.dot(W[c], x) * y < 1:
-            W[c] += etaT / self.k * y * x
+
+        (x,d) = AsubT
+        y = 1 if (d == c) else -1
+        if np.dot(W[c], x) * y < 1:
+          W[c] += etaT * y * x
         
         wNorm = np.linalg.norm(W[c])
         maxNorm = 1.0 / np.sqrt(self.l)
