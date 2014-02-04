@@ -10,16 +10,14 @@ class NeuralNet:
   # theta threshold for a training point in the correct direction, consider
   # changing the relevant synapse weights to increase separation: bump the
   # synapse weight in the appropriate direction with probability transP
-  N = 10
   theta = 0
   delta = 1 
   transP = 0.01
-  D = 900
   C = 10
 
-  def __init__(self):
-    # Initialize synapse array to correct shape
-    self.synapses = np.zeros((self.C, self.N, self.D))
+  def __init__(self, N = 10):
+    # Set the number of neurons per class
+    self.N = N
 
   # Using our synapse weights, classify x as one of the C classes
   def classify(self, x):
@@ -30,12 +28,25 @@ class NeuralNet:
 
   #trainData must be "labeled" - see digit_features.py
   def trainOnSet(self, trainData, numIterations):
+    # How long are the vectors we're classifying? Must be all the same
+    self.D = trainData[0][0].shape[0]
+    # How many different classes are there? Pull it out of the training data
+    # Training data must be of form [(V1, c1), (V2, c2), ...]
+    # where Vn is the n'th training vector, and cn is the corresponding class
+    # label - every 'c' value is just an integer
+    self.C = np.unique(trainData[...,1]).size
+
+    # Initialize synapse array to correct shape
+    self.synapses = np.zeros((self.C, self.N, self.D))
+
     synapses = self.synapses
     T = numIterations
     numTrainPts = len(trainData)
 
+    print "Training neural net on {} examples".format(numIterations)
     for t in range(T):
-      print t
+      if t % (numIterations / 100) == 0:
+        print "{}% done".format(100 * t / numIterations)
       # At every sweep through the training points, shuffle the order
       if t % numTrainPts == 0: np.random.shuffle(trainData)
       (x,d) = trainData[t % numTrainPts]
@@ -72,6 +83,8 @@ class NeuralNet:
       synapses += synapsePluses
       # Decrement synapses meeting decrementation conditions (see above)
       synapses -= synapseMinuses
+    
+    print "Neural net training complete!"
 
   def testOnSet(self, testData):
     synapses = self.synapses
@@ -93,7 +106,8 @@ class NeuralNet:
 
 
 
-
+# With 10 neurons, 10 classes, performance seems to taper off somewhere between
+# 5000 and 10000 iterations
 def testNeuralNet(numIterations):
   trainData = df.labeled(df.flatPixelTrainData())
   testData = df.flatPixelTestData().reshape(10,1000,900)
