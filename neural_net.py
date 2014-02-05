@@ -1,6 +1,7 @@
 import numpy as np
 from random import randrange, random
 import digit_features as df
+import matplotlib.pyplot as plt
 
 
 class NeuralNet:
@@ -45,7 +46,7 @@ class NeuralNet:
 
     print "Training neural net on {} examples".format(numIterations)
     for t in range(T):
-      if t % (numIterations / 100) == 0:
+      if t % (numIterations / 5) == 0:
         print "{}% done".format(100 * t / numIterations)
       # At every sweep through the training points, shuffle the order
       if t % numTrainPts == 0: np.random.shuffle(trainData)
@@ -103,7 +104,22 @@ class NeuralNet:
 
     print "Total error: ", 100*totalErrors/totalTestPoints, "%"
 
-
+  # Show a graphical representation of the average neuron weights, per class
+  # Assume the vectors correspond to square image data
+  def displayClassMeans(self):
+    classMeans = self.synapses.mean(axis=1)
+    sideLength = np.sqrt(self.D)
+    if self.D != sideLength**2: 
+      raise Exception("Vectors must be of length n^2 for some integer n")
+    plt.close('all')
+    fig, axes = plt.subplots(1, self.C, figsize=(self.C,1)) 
+    for i in range(self.C):
+      w = classMeans[i].reshape((30,30))
+      curAxes = axes[i]
+      curAxes.imshow(w,cmap='bone')
+      curAxes.xaxis.set_ticks([])
+      curAxes.yaxis.set_ticks([])
+    plt.show()
 
 
 # With 10 neurons, 10 classes, performance seems to taper off somewhere between
@@ -112,9 +128,11 @@ def testNeuralNet(numIterations):
   trainData = df.labeled(df.flatPixelTrainData())
   testData = df.flatPixelTestData().reshape(10,1000,900)
 
-  net = NeuralNet()
+  net = NeuralNet(100)
   net.trainOnSet(trainData, numIterations)
   net.testOnSet(testData)
+  net.displayClassMeans()
   return net
+#testNeuralNet(8000)
 
 

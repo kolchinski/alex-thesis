@@ -33,8 +33,8 @@ class PegasosSVM:
         # Every full sweep through the training points, shuffle their order
         if t % S == 0: np.random.shuffle(trainData)
 
-        #Every 10% of training points, print out total loss
-        if t % (T/10) == 0: 
+        #Every 20% of training points, print out total loss
+        if t % (T/5) == 0: 
           weightPenalty = self.l / 2.0 * np.linalg.norm(W[c])**2
           dotProducts = np.inner(unlabeledTrainData, W[c])
           #Ys is 1 if class matches, -1 if not
@@ -79,27 +79,49 @@ class PegasosSVM:
       print "Error for class {}: {}%".format(c, 100.0*(total - rights)/total)
     print classifications
 
-  def displayWeights(self):
-    # graph learned digit representations for edges
+  def displayEdgeWeights(self):
+    # graph learned digit representations, hardcoded for edges
     plt.close('all')
+    fig, axes = plt.subplots(self.C, 9, figsize=(self.C,9)) 
     meanedges = np.mean(self.W.reshape(10,30,30,8), axis=3)
     for i in range(self.C):
       w = self.W[i].reshape((30,30,8))
-      plt.subplot(self.C,9,9*i+1)
-      plt.imshow(meanedges[i], cmap='Reds')
+      axes[i,0].imshow(meanedges[i], cmap='Reds')
+      axes[i,0].xaxis.set_ticks([])
+      axes[i,0].yaxis.set_ticks([])
+      #plt.subplot(self.C,9,9*i+1)
+      #plt.imshow(meanedges[i], cmap='Reds')
       for j in range(8):
-        plt.subplot(self.C,9,9*i+j+2)
-        plt.imshow(w[:,:,j], cmap='bone')
+        #plt.subplot(self.C,9,9*i+j+2)
+        #plt.imshow(w[:,:,j], cmap='bone')
+        axes[i,j+1].imshow(w[:,:,j], cmap='bone')
+        axes[i,j+1].xaxis.set_ticks([])
+        axes[i,j+1].yaxis.set_ticks([])
         
+    plt.show()
+
+  def displayPixelWeights(self):
+    # graph learned digit representations, hardcoded for pixels 
+    plt.close('all')
+    fig, axes = plt.subplots(1, self.C, figsize=(self.C,1)) 
+    for i in range(self.C):
+      w = self.W[i].reshape((30,30))
+      curAxes = axes[i]
+      curAxes.imshow(w,cmap='bone')
+      curAxes.xaxis.set_ticks([])
+      curAxes.yaxis.set_ticks([])
     plt.show()
 
   def showProductHistogram(self, testData):
     # Histogram of digit-weight dot products
+    plt.close('all')
+    fig, axes = plt.subplots(self.C, self.C, figsize=(1.5*self.C,1.5*self.C)) 
     for wtClass in range(10):
       for imgClass in range(10):
-        plt.subplot(10,10,1+wtClass*10+imgClass)
+        #plt.subplot(10,10,1+wtClass*10+imgClass)
         products = np.inner(testData[imgClass*1000:(imgClass+1)*1000],self.W[wtClass])
-        plt.hist(products, range=(-10,10))
+        axes[wtClass,imgClass].hist(products, range=(-10,10))
+    plt.tight_layout()
     plt.show()
 
 
@@ -116,3 +138,10 @@ def testPegasos():
   return peg
 #peg = testPegasos()
 
+#import digit_features as df
+#pixelPegasos = PegasosSVM()
+#pixelPegasos.trainOnSet(df.labeled(df.flatPixelTrainData()), df.flatPixelTrainData(), 8000)
+#pixelPegasos.displayPixelWeights()
+#edgePegasos = PegasosSVM()
+#edgePegasos.trainOnSet(df.labeled(df.flatEdgeTrainData()), df.flatEdgeTrainData(), 8000)
+#edgePegasos.displayEdgeWeights()
