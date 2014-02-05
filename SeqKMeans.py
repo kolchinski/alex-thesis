@@ -4,15 +4,14 @@ import matplotlib.pyplot as plt
 
 class SeqKMeans:
   #trainPts should be a 2D numpy array of first-axis length (# of training points)
-  def __init__(self, trainPts, numClusters):
+  def __init__(self, trainPts):
     self.trainPts = trainPts
-    self.numClusters = numClusters
     #self.trainMeans()
     #self.trainMeansGrowing()
 
   #Make new clusters when none is close enough
   #This doesn't work very well - better to focus on mixed number of clusters
-  def trainMeansGrowing(self):
+  def trainMeansGrowing(self, clusterCutoff = 10.0):
     Ts = self.trainPts
     np.random.shuffle(Ts)
     N = len(Ts)
@@ -20,7 +19,7 @@ class SeqKMeans:
     s = self.sideLength
     self.means = [np.copy(Ts[0])]
     self.weights = [1]
-    NEW_CLUSTER_CUTOFF = 10.0
+    NEW_CLUSTER_CUTOFF = clusterCutoff
  
     for n in range(N):
       dists = self.dists_to_means(Ts[n])
@@ -36,18 +35,21 @@ class SeqKMeans:
     print "Points per cluster: ", self.weights
     plt.close('all')
     numClusters = len(self.means)
+    fig, axes = plt.subplots(1, numClusters, figsize=(0.7*numClusters,1)) 
     for i in range(numClusters):
       curMean = np.copy(self.means[i])
-      plt.subplot(1,numClusters, i+1)
-      plt.imshow(curMean.reshape(s,s), cmap='bone')
+      curAxes = axes[i]
+      curAxes.xaxis.set_ticks([])
+      curAxes.yaxis.set_ticks([])
+      curAxes.imshow(curMean.reshape(s,s), cmap='bone')
     plt.show()
 
 
-  def trainMeans(self):
+  def trainMeans(self, numClusters):
     Ts = self.trainPts
     np.random.shuffle(Ts)
     N = len(Ts)
-    K = self.numClusters
+    K = numClusters
     self.sideLength = np.sqrt(len(self.trainPts[0]))
     s = self.sideLength
 
@@ -127,6 +129,6 @@ class SeqKMeans:
     #print "Overall error rate: {}".format(errorRates.mean())
     print classifications
 
-import digit_features as df
-skm1 = SeqKMeans(df.flatPixelTrainData(),10)
-skm1.trainMeans()
+#import digit_features as df
+#skm1 = SeqKMeans(df.flatPixelTrainData(),10)
+#skm1.trainMeans()
