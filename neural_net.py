@@ -16,9 +16,10 @@ class NeuralNet:
   transP = 0.01
   C = 10
 
-  def __init__(self, N = 10):
+  def __init__(self, N = 10, delta = 1):
     # Set the number of neurons per class
     self.N = N
+    self.delta = delta
 
   # Using our synapse weights, classify x as one of the C classes
   def classify(self, x):
@@ -114,7 +115,7 @@ class NeuralNet:
     plt.close('all')
     fig, axes = plt.subplots(1, self.C, figsize=(self.C,1)) 
     for i in range(self.C):
-      w = classMeans[i].reshape((30,30))
+      w = classMeans[i].reshape((sideLength,sideLength))
       curAxes = axes[i]
       curAxes.imshow(w,cmap='bone')
       curAxes.xaxis.set_ticks([])
