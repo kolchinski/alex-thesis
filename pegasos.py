@@ -120,7 +120,7 @@ class PegasosSVM:
       for imgClass in range(10):
         #plt.subplot(10,10,1+wtClass*10+imgClass)
         products = np.inner(testData[imgClass*1000:(imgClass+1)*1000],self.W[wtClass])
-        axes[wtClass,imgClass].hist(products, range=(-10,10))
+        axes[wtClass,imgClass].hist(products, range=(-5,5))
     plt.tight_layout()
     plt.show()
 
