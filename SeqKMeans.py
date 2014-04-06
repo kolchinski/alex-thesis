@@ -45,7 +45,7 @@ class SeqKMeans:
     plt.show()
 
 
-  def trainMeans(self, numClusters):
+  def trainMeans(self, numClusters, useBernoulli = False, epsilon = 0.01):
     Ts = self.trainPts
     np.random.shuffle(Ts)
     N = len(Ts)
@@ -72,7 +72,7 @@ class SeqKMeans:
 
     np.random.shuffle(Ts)
     for n in range(N):
-      closestCluster = self.classify(Ts[n])
+      closestCluster = self.classify(Ts[n], useBernoulli, epsilon)
       self.weights[closestCluster] += 1
       
       delta = (1.0 / self.weights[closestCluster]) * (Ts[n] - self.means[closestCluster])
@@ -91,13 +91,27 @@ class SeqKMeans:
     plt.show()
 
 
-  #Use Euclidian distance instead
-  def classify(self, p):
+  #Use Euclidian distance or BernoulliProbability
+  def classify(self, p, useBernoulli = False, epsilon = 0.01):
     #print self.dists_to_means(p)
-    return np.argmin(self.dists_to_means(p))
+    if useBernoulli: return np.argmax(self.berProbsPerMean(p, epsilon))
+    else:            return np.argmin(self.dists_to_means(p))
 
+  #Euclidian distances
   def dists_to_means(self,p):
     return np.apply_along_axis(np.linalg.norm,1,self.means-p)
+
+  # Bernoulli probability - probs is vector of probabilities, 
+  # v is binary vector. Smoothed by epsilon to avoid zero probabilities
+  def bernoulliProb(self, probs, v, epsilon):
+    berProbs = np.power(probs, v)
+    return np.product((berProbs == 0) * epsilon + berProbs)
+
+  # Given a point, return a vector of length (# of clusters), of which each
+  # entry corresponds to the Bernoulli likelihood for the point relative to
+  # the given cluster mean interpreted as a vector of Bernoulli probabilities
+  def berProbsPerMean(self, v, epsilon):
+    return np.apply_along_axis(lambda p: self.bernoulliProb(p, v, epsilon), 1, self.means)
 
   def showClusters(self):
     sideLength = np.sqrt(len(self.trainPts[0]))
