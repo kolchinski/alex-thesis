@@ -21,7 +21,7 @@ class SeqKMeans:
     self.weights = [1]
     NEW_CLUSTER_CUTOFF = clusterCutoff
  
-    for n in range(N):
+    for n in range(1, N):
       dists = self.dists_to_means(Ts[n])
       if np.min(dists) < NEW_CLUSTER_CUTOFF:
         closestCluster = np.argmin(dists)
@@ -44,8 +44,54 @@ class SeqKMeans:
       curAxes.imshow(curMean.reshape(s,s), cmap='bone')
     plt.show()
 
+  # Make new clusters when none is close enough - if point likelihood more than
+  # 2 standard deviations from mean of cluster, make new cluster with that point
+  def trainMeansGrowingBernoulli(self, epsilon = .2):
+    Ts = self.trainPts
+    np.random.shuffle(Ts)
+    N = len(Ts)
+    self.sideLength = np.sqrt(len(self.trainPts[0]))
+    s = self.sideLength
+    self.means = [np.copy(Ts[0])]
+    self.weights = [1]
+    self.clusterPoints = [[np.copy(Ts[0])]]
+ 
+    for n in range(1,N):
+      probs = self.berProbsPerMean(Ts[n], epsilon)
+      bestCluster = np.argmax(probs)
+      bestClusterMean = self.means[bestCluster]
+      bestClusterPts = self.clusterPoints[bestCluster]
+      bestClusterLiks = [self.bernoulliProb(bestClusterMean, v, epsilon) for v in bestClusterPts]
+      likMean = np.mean(bestClusterLiks)
+      likStdev = np.std(bestClusterLiks)
+      
+      pointLik = self.bernoulliProb(bestClusterMean, Ts[n], epsilon)
 
-  def trainMeans(self, numClusters, useBernoulli = False, epsilon = 0.01):
+      # If point likelihood is within 6 standard deviations for cluster, or 
+      std = likMean / 2.0 if likStdev == 0 else likStdev
+      if np.abs(pointLik - likMean) / std < 3:
+        bestClusterPts.append(np.copy(Ts[n]))
+        self.weights[bestCluster] += 1
+        self.means[bestCluster] = np.mean(bestClusterPts, axis=0)
+      else:
+        self.means.append(np.copy(Ts[n]))
+        self.clusterPoints.append([np.copy(Ts[n])])
+        self.weights.append(1)
+    
+    print "Points per cluster: ", self.weights
+    plt.close('all')
+    numClusters = len(self.means)
+    fig, axes = plt.subplots(1, numClusters, figsize=(0.7*numClusters,1)) 
+    for i in range(numClusters):
+      curMean = np.copy(self.means[i])
+      curAxes = axes[i]
+      curAxes.xaxis.set_ticks([])
+      curAxes.yaxis.set_ticks([])
+      curAxes.imshow(curMean.reshape(s,s), cmap='bone')
+    plt.show()
+
+
+  def trainMeans(self, numClusters, useBernoulli = False, epsilon = 0.2):
     Ts = self.trainPts
     np.random.shuffle(Ts)
     N = len(Ts)
@@ -92,7 +138,7 @@ class SeqKMeans:
 
 
   #Use Euclidian distance or BernoulliProbability
-  def classify(self, p, useBernoulli = False, epsilon = 0.01):
+  def classify(self, p, useBernoulli = False, epsilon = 0.2):
     #print self.dists_to_means(p)
     if useBernoulli: return np.argmax(self.berProbsPerMean(p, epsilon))
     else:            return np.argmin(self.dists_to_means(p))
@@ -144,5 +190,5 @@ class SeqKMeans:
     print classifications
 
 #import digit_features as df
-#skm1 = SeqKMeans(df.flatPixelTrainData(),10)
-#skm1.trainMeans()
+#skm1 = SeqKMeans(df.flatPixelTrainData())
+#skm1.trainMeansGrowingBernoulli()
