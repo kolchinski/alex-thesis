@@ -46,7 +46,7 @@ class SeqKMeans:
 
   # Make new clusters when none is close enough - if point likelihood more than
   # 2 standard deviations from mean of cluster, make new cluster with that point
-  def trainMeansGrowingBernoulli(self, epsilon = .2):
+  def trainMeansGrowingBernoulli(self, epsilon = .2, std_cutoff = 3):
     Ts = self.trainPts
     np.random.shuffle(Ts)
     N = len(Ts)
@@ -69,7 +69,7 @@ class SeqKMeans:
 
       # If point likelihood is within 6 standard deviations for cluster, or 
       std = likMean / 2.0 if likStdev == 0 else likStdev
-      if np.abs(pointLik - likMean) / std < 3:
+      if np.abs(pointLik - likMean) / std < std_cutoff:
         bestClusterPts.append(np.copy(Ts[n]))
         self.weights[bestCluster] += 1
         self.means[bestCluster] = np.mean(bestClusterPts, axis=0)
@@ -114,7 +114,7 @@ class SeqKMeans:
     graphEvery = N / numGraphSteps
 
     plt.close('all')
-    fig, axes = plt.subplots(numGraphSteps, K, figsize=(10,10)) 
+    fig, axes = plt.subplots(numGraphSteps, K, figsize=(20,20)) 
 
     np.random.shuffle(Ts)
     for n in range(N):
@@ -150,8 +150,7 @@ class SeqKMeans:
   # Bernoulli probability - probs is vector of probabilities, 
   # v is binary vector. Smoothed by epsilon to avoid zero probabilities
   def bernoulliProb(self, probs, v, epsilon):
-    # TODO Fix this!! not correct Bernoulli probability
-    berProbs = np.power(probs, v)
+    berProbs = np.power(probs, v) * np.power(1.0 - probs, 1 - v) 
     return np.product((berProbs == 0) * epsilon + berProbs)
 
   # Given a point, return a vector of length (# of clusters), of which each
