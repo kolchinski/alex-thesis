@@ -9,11 +9,11 @@ trainPrefix = 'tr'
 testPrefix = 'te'
 D = S*S
 
-def labeled(data):
+def labeled(data, numClasses = 10):
   labeledData = []
   L = len(data)
   for i in range(L):
-    labeledData.append((data[i],i*10/L))
+    labeledData.append((data[i],i*numClasses/L))
   return np.array(labeledData)
 
 def pixelData(prefix,N):

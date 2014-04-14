@@ -8,8 +8,8 @@ class PegasosSVM:
   l = 0.5 # learning rate
   C = 10  # Number of classes
 
-  def __init__(self):
-    pass
+  def __init__(self, numClasses = 10):
+    self.C = numClasses 
 
   def classify(self, x):
     dots = [np.dot(self.W[d], x) for d in range(self.C)]
@@ -38,7 +38,7 @@ class PegasosSVM:
           weightPenalty = self.l / 2.0 * np.linalg.norm(W[c])**2
           dotProducts = np.inner(unlabeledTrainData, W[c])
           #Ys is 1 if class matches, -1 if not
-          Ys = (np.arange(S) / (S/10) == c) * 2 - 1
+          Ys = (np.arange(S) / (S/self.C) == c) * 2 - 1
           losses = (1 - Ys * dotProducts)
           positiveLosses = (losses > 0) * losses
           avgLoss = np.mean(positiveLosses)
@@ -61,7 +61,7 @@ class PegasosSVM:
           W[c] *= (maxNorm / wNorm)
           
   def testOnSet(self, testData):
-    classifications = np.zeros((10,10))
+    classifications = np.zeros((self.C,self.C))
 
     totalErrors = 0
     numTestPoints = len(testData)
@@ -72,7 +72,7 @@ class PegasosSVM:
       if not classedAs == c:
         totalErrors += 1
 
-    print "Total error: ", 100*totalErrors/numTestPoints, "%"
+    print "Total error: ", 100.0*totalErrors/numTestPoints, "%"
     for c in range(self.C):
       rights = classifications[c][c]
       total = np.sum(classifications[c])

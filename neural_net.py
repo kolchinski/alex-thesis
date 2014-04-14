@@ -30,6 +30,9 @@ class NeuralNet:
 
   #trainData must be "labeled" - see digit_features.py
   def trainOnSet(self, trainData, numIterations):
+    # Keep track of how synapse training progresses
+    synapseHistory = []
+
     # How long are the vectors we're classifying? Must be all the same
     self.D = trainData[0][0].shape[0]
     # How many different classes are there? Pull it out of the training data
@@ -51,6 +54,8 @@ class NeuralNet:
         print "{}% done".format(100 * t / numIterations)
       # At every sweep through the training points, shuffle the order
       if t % numTrainPts == 0: np.random.shuffle(trainData)
+      # Keep track of hos the synapse weights change every 10 iterations
+      if t % 10 == 0: synapseHistory.append(np.copy(self.synapses))
       (x,d) = trainData[t % numTrainPts]
 
       # We can increment a synapse if it's not maxed out, and vice versa
@@ -87,6 +92,7 @@ class NeuralNet:
       synapses -= synapseMinuses
     
     print "Neural net training complete!"
+    return synapseHistory
 
   def testOnSet(self, testData):
     synapses = self.synapses
@@ -101,9 +107,9 @@ class NeuralNet:
           numErrors += 1
           totalErrors += 1
       print "Character ", c, ": ", numErrors, " errors out of ", \
-          numTestPoints, "; ", 100*numErrors/numTestPoints, " % error"
+          numTestPoints, "; ", 100.0*numErrors/numTestPoints, " % error"
 
-    print "Total error: ", 100*totalErrors/totalTestPoints, "%"
+    print "Total error: ", 100.0*totalErrors/totalTestPoints, "%"
 
   # Show a graphical representation of the average neuron weights, per class
   # Assume the vectors correspond to square image data

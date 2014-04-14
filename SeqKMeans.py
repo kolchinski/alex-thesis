@@ -150,6 +150,7 @@ class SeqKMeans:
   # Bernoulli probability - probs is vector of probabilities, 
   # v is binary vector. Smoothed by epsilon to avoid zero probabilities
   def bernoulliProb(self, probs, v, epsilon):
+    # TODO Fix this!! not correct Bernoulli probability
     berProbs = np.power(probs, v)
     return np.product((berProbs == 0) * epsilon + berProbs)
 
@@ -157,6 +158,8 @@ class SeqKMeans:
   # entry corresponds to the Bernoulli likelihood for the point relative to
   # the given cluster mean interpreted as a vector of Bernoulli probabilities
   def berProbsPerMean(self, v, epsilon):
+    numsOfPts = np.array(self.weights).reshape((len(self.weights), 1))
+    adjustedProbs = (self.means * numsOfPts + 2) / (numsOfPts + 4)
     return np.apply_along_axis(lambda p: self.bernoulliProb(p, v, epsilon), 1, self.means)
 
   def showClusters(self):
