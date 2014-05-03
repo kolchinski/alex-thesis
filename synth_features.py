@@ -17,7 +17,7 @@ def posVector(N = 100, M = 10):
 def negVector(N = 100, M = 10):
   return 1 * (random(N) < P_BGD)
 
-# M is length of vectors, N is number of high/low (as opposed to background)
+# N is length of vectors, M is number of high/low (as opposed to background)
 # probability pixels
 def synthData(ptsPerClass, N = 100, M = 10):
   data = np.zeros((2 * ptsPerClass, N));

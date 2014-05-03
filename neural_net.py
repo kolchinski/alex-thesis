@@ -54,7 +54,7 @@ class NeuralNet:
         print "{}% done".format(100 * t / numIterations)
       # At every sweep through the training points, shuffle the order
       if t % numTrainPts == 0: np.random.shuffle(trainData)
-      # Keep track of hos the synapse weights change every 10 iterations
+      # Keep track of how the synapse weights change every 10 iterations
       if t % 10 == 0: synapseHistory.append(np.copy(self.synapses))
       (x,d) = trainData[t % numTrainPts]
 
