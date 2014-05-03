@@ -50,3 +50,11 @@ talk to Gustav/Mark about putting everything into Amitgroup
 start writing everything up
 
 Look up Gatsby Institute, MSR in England - Christopher Bishop is there
+
+
+
+
+
+Questions:
+
+should unsupervised per-class neuron sets be disjoint from each other?
