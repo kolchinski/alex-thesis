@@ -1,0 +1,52 @@
+Calculate Bayes errors (mle ideal errors) for all classifiers to 
+compare with our classifiers
+
+Don't do square images on image data - come up with a better
+visualization like histogram/scatterplot similarly to already done
+
+With Bayesian smoothing and Bernoulli metric, try starting with non-growing
+k-means, do it until we get a fixed number of clusters, and then switch
+to growing mode
+
+
+For MNIST svm/net comparison, only do 0s vs rest (not rest vs 0) for SVM
+and net - only one set of weights for both SVM and net. Try plotting
+against each other, regress/correlate, see which features are not just
+noise...
+
+On synthetic data, look at pegasos weights for positive/negative/background
+features - should be same for features with same probability theoretically
+Look at histograms, means, stdevs - can you predict the distribution of the
+weights from the probability?
+Check in literature for analysis of SVM for predetermined distribution
+
+Why is neural net converging to given values? This is tough to figure out
+because we don't learn on examples when the "field" value is good enough
+
+send Srebro stuff for feedback, but also talk to Rina Foygel in statistics
+
+
+do clustering for neural net. for first x (say 50) examples, activate a random set of
+N neurons (say, 20) and set those to be the output neurons for that class
+conduct Hebbian learning (maybe high speed - parameter > 0.01) to make the synapses
+sensible
+for subsequent examples, classify based on the weights learned by the first 50 and
+assign to clusters by voting
+
+how to initialize synapses?
+try initializing synapses to values other than just all 0s - would all 0 and some
+proportion -1 make more sense? or even 1/0/-1
+Try this on synthetic data - make x (3?) components of a mixture model and try
+clustering them, start with 1 or 2 examples per mixture component, so create
+3 or 6 initial clusters and then proceed
+
+for subsequent examples, conduct a vote - whichever component has the highest
+number of neurons turned on is the winner, then conduct Hebbian learning 
+for positive reinforcement on the winner and negative reinforcement on the losers
+same speed for both? maybe smaller speed for losers
+
+talk to Gustav/Mark about putting everything into Amitgroup
+
+start writing everything up
+
+Look up Gatsby Institute, MSR in England - Christopher Bishop is there
