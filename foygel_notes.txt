@@ -1,0 +1,24 @@
+try plotting perceptrons individually to see if they converge to the same value
+
+try multiple experiments on the same data set - same convergence?
+
+modify proportions and probabilities on synthetic data to see how the asymptotic
+probabilities compare
+
+changing number of perceptrons per class - do asymptotic proportions change?
+
+stable state probably when no more errors - check this, and figure out where
+the stable state is - initialize proportions to different values and see
+where stable state is
+
+try using only one non-background region for more simple analysis
+
+
+draw stable-state plot - which 1/-1 probabilities cause stability?
+2D binary plot
+maybe heat map - how much it moves over the next 10 iterations
+
+
+especially with only two (high/bgd) regions - try to find analytically
+the proportions of synapses for the regions that'll make the neural net
+classify correctly

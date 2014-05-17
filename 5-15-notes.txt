@@ -1,0 +1,23 @@
+Paper
+Explain what pegasos is dong
+Explain what the neural net is doing
+write down differences between pegasos and neural net
+pegasos penalizes weights squared
+neural net constrains weights to 1/-1
+
+Experiments with synthetic data - comparison of weights and convergence
+how do neural net and svm weights converge?
+how do they compare to each other for a given data set?
+try using synthetic data for comparison
+
+try solving the linear svm optimization equation for synthetic data
+W*x turns into Whigh * xhigh + Wlow * hlow + Wbackground * xbackground
+can use means from x because w should be same for all identical-p bernoulli variables
+
+
+on the synthetic data, the neural net converges to a certain amount of synapses
+being the "wrong" value - why? and compare to SVM
+
+
+after doing the synthetic data comparisons, do this on real data on show that it's
+similar

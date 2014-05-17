@@ -26,7 +26,14 @@ class NeuralNet:
     if len(x) != self.D: raise Exception("Incorrect length of vector")
     # Classify the vector by taking the dot product with each set of synapses,
     # and picking the class that has the most # of neurons with dot product > theta
-    return np.argmax(np.sum(np.dot(self.synapses,x) > self.theta, 1))
+    #return np.argmax(np.sum(np.dot(self.synapses,x) > self.theta, 1))
+
+    neuronsOnPerClass = np.sum(np.dot(self.synapses,x) > self.theta, 1)
+    bestClass = np.argmax(neuronsOnPerClass)
+    print neuronsOnPerClass, bestClass
+    return bestClass
+    # reversedMax = np.argmax(neuronsOnPerClass[::-1])
+    # return len(neuronsOnPerClass) - 1 - reversedMax
 
   #trainData must be "labeled" - see digit_features.py
   def trainOnSet(self, trainData, numIterations):
@@ -135,11 +142,11 @@ def testNeuralNet(numIterations):
   trainData = df.labeled(df.flatPixelTrainData())
   testData = df.flatPixelTestData().reshape(10,1000,900)
 
-  net = NeuralNet(100)
+  net = NeuralNet(20)
   net.trainOnSet(trainData, numIterations)
   net.testOnSet(testData)
   net.displayClassMeans()
   return net
-#testNeuralNet(8000)
+testNeuralNet(5000)
 
 

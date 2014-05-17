@@ -2,6 +2,7 @@ import numpy as np
 from random import randrange, random
 import digit_features as df
 import matplotlib.pyplot as plt
+import synth_features as sf
 
 
 class UnsupervisedNeuralNet:
@@ -11,25 +12,31 @@ class UnsupervisedNeuralNet:
   # theta threshold for a training point in the correct direction, consider
   # changing the relevant synapse weights to increase separation: bump the
   # synapse weight in the appropriate direction with probability transP
-  theta = 0
+  theta = 1
   delta = 1 
-  transP = 0.01
+  transP = 0.05
+  initTransP = 0.01
   C = 10
 
-  def __init__(self, N = 10, delta = 1):
+  def __init__(self, numClasses, N = 10, delta = 1):
     # Set the number of neurons per class
     self.N = N
     self.delta = delta
+    self.C = numClasses
 
   # Using our synapse weights, classify x as one of the C classes
   def classify(self, x):
     if len(x) != self.D: raise Exception("Incorrect length of vector")
     # Classify the vector by taking the dot product with each set of synapses,
     # and picking the class that has the most # of neurons with dot product > theta
-    return np.argmax(np.sum(np.dot(self.synapses,x) > self.theta, 1))
+    # return np.argmax(np.sum(np.dot(self.synapses,x) > self.theta, 1))
+
+    onNeuronCounts = np.sum(np.dot(self.synapses,x) > self.theta, 1)
+    print onNeuronCounts
+    return np.argmax(onNeuronCounts)
 
   # x is the vector, d is its class
-  def trainOnPoint(self, synapses, x, d):
+  def trainOnPoint(self, synapses, x, d, transProb):
     # We can increment a synapse if it's not maxed out, and vice versa
     canIncrement = synapses < 1
     canDecrement = synapses > -1
@@ -43,6 +50,9 @@ class UnsupervisedNeuralNet:
     sameClass[d] = np.ones((self.N, self.D))
 
     # A neuron's field is the dot product of synapses times input vector
+    print self.C, self.N
+    print synapses.shape
+    print np.inner(x,synapses).shape
     fields = np.inner(x, synapses).reshape(self.C, self.N, 1)
     # Must have low field to consider incrementing synapse weights
     lowField = (fields < self.theta + self.delta) 
@@ -51,9 +61,9 @@ class UnsupervisedNeuralNet:
     highField = (fields > self.theta - self.delta) 
     highField = highField * np.ones((self.C, self.N, self.D))
 
-    # Only change synapse weights with probability transP, assuming
+    # Only change synapse weights with probability transProb, assuming
     # the other conditions are met
-    rands = np.random.random((self.C, self.N, self.D)) < self.transP
+    rands = np.random.random((self.C, self.N, self.D)) < transProb
 
     synapsePluses = inputIsOn * sameClass * canIncrement * lowField * rands
     synapseMinuses = inputIsOn * (1 - sameClass) * canDecrement * highField * rands
@@ -64,37 +74,71 @@ class UnsupervisedNeuralNet:
     synapses -= synapseMinuses
 
 
-  #trainData must be "labeled" - see digit_features.py
-  def trainOnSet(self, trainData, numIterations):
+  def initializeSynapses(self):
+    # Initialize synapse array to correct shape
+    self.synapses = np.zeros((self.C, self.N, self.D))
+    self.synapses += (np.random.random((self.C, self.N, self.D)) < self.initTransP)
+    self.synapses -= (np.random.random((self.C, self.N, self.D)) < self.initTransP)
+
+  def randomizedSynapses(self, C, N, D):
+    synapses = np.zeros((C, N, D))
+    synapses += (np.random.random((C, N, D)) < self.initTransP)
+    synapses -= (np.random.random((C, N, D)) < self.initTransP)
+    return synapses
+
+  # for each point, make a new cluster if the existing ones aren't good enough
+  # otherwise, join it to the best cluster
+  def trainOnSetGrowing(self, trainData):
+    np.random.shuffle(trainData)
+    self.D = trainData[0].shape[0]
+    self.C = 1
+    synapses = self.randomizedSynapses(1,self.N, self.D)
+    self.trainOnPoint(synapses, trainData[0], 0, self.initTransP)
+
+    for p in trainData[1:]:
+      onNeuronCounts = np.sum(np.dot(synapses,p) > self.theta, 1)
+      print onNeuronCounts
+      if np.max(onNeuronCounts) > self.N / 2:
+        bestClass = np.argmax(onNeuronCounts)
+        self.trainOnPoint(synapses, p, bestClass, self.transP)
+      else:
+        synapses = np.vstack((synapses,self.randomizedSynapses(1,self.N,self.D)))
+        self.C += 1
+        self.trainOnPoint(synapses, p, self.C - 1, self.initTransP)
+
+    return synapses
+
+
+
+
+  def trainOnSet(self, trainData):
     # Keep track of how synapse training progresses
     synapseHistory = []
 
     # How long are the vectors we're classifying? Must be all the same
-    self.D = trainData[0][0].shape[0]
-    # How many different classes are there? Pull it out of the training data
-    # Training data must be of form [(V1, c1), (V2, c2), ...]
-    # where Vn is the n'th training vector, and cn is the corresponding class
-    # label - every 'c' value is just an integer
-    self.C = np.unique(trainData[...,1]).size
-
-    # Initialize synapse array to correct shape
-    self.synapses = np.zeros((self.C, self.N, self.D))
-
+    self.D = trainData[0].shape[0]
+    self.initializeSynapses()
     synapses = self.synapses
-    T = numIterations
     numTrainPts = len(trainData)
 
-    print "Training neural net on {} examples".format(numIterations)
-    for t in range(T):
-      if t % (numIterations / 5) == 0:
-        print "{}% done".format(100 * t / numIterations)
-      # At every sweep through the training points, shuffle the order
-      if t % numTrainPts == 0: np.random.shuffle(trainData)
-      # Keep track of how the synapse weights change every 10 iterations
-      if t % 10 == 0: synapseHistory.append(np.copy(self.synapses))
-      (x,d) = trainData[t % numTrainPts]
-      self.trainOnPoint(self.synapses, x, d)
+    self.pointsPerCluster = [[] for i in range(self.C)]
 
+    np.random.shuffle(trainData)
+
+    print "Training unsupervised neural net on {} examples".format(numTrainPts)
+    for i in range(self.C):
+      self.trainOnPoint(self.synapses, trainData[i], i, self.initTransP)
+      self.pointsPerCluster[i].append(trainData[i])
+
+    numPtsTrained = self.C
+    for p in trainData[self.C:]:
+      numPtsTrained += 1
+      if (numPtsTrained * 100) % numTrainPts == 0:
+        print "{}% complete".format(100.0 * numPtsTrained / numTrainPts)
+      bestClass = self.classify(p)
+      print bestClass
+      self.trainOnPoint(self.synapses, p, bestClass, self.transP)
+      self.pointsPerCluster[bestClass].append(p)
 
     
     print "Neural net training complete!"
@@ -120,6 +164,7 @@ class UnsupervisedNeuralNet:
   # Show a graphical representation of the average neuron weights, per class
   # Assume the vectors correspond to square image data
   def displayClassMeans(self):
+    print [len(c) for c in self.pointsPerCluster]
     classMeans = self.synapses.mean(axis=1)
     sideLength = np.sqrt(self.D)
     if self.D != sideLength**2: 
@@ -137,15 +182,26 @@ class UnsupervisedNeuralNet:
 
 # With 10 neurons, 10 classes, performance seems to taper off somewhere between
 # 5000 and 10000 iterations
-def testNeuralNet(numIterations):
-  trainData = df.labeled(df.flatPixelTrainData())
-  testData = df.flatPixelTestData().reshape(10,1000,900)
+def testUnsupervisedNeuralNet():
+  trainData = df.flatPixelTrainData()
+  synthTrainData = sf.synthData(500,256,128)
+  #testData = df.flatPixelTestData().reshape(10,1000,900)
 
-  net = UnsupervisedNeuralNet(10)
-  net.trainOnSet(trainData, numIterations)
-  net.testOnSet(testData)
+  net = UnsupervisedNeuralNet(20)
+  synapses = net.trainOnSetGrowing(trainData)
+  #net.testOnSet(testData)
   net.displayClassMeans()
-  return net
-testNeuralNet(4000)
+  return synapses
+#testNeuralNet()
 
 
+def testSingleCluster():
+  trainData = df.flatPixelTrainData()
+  unn = UnsupervisedNeuralNet(20)
+  np.random.shuffle(trainData)
+  unn.C = 1
+  unn.D = 900
+  unn.initializeSynapses()
+  unn.trainOnPoint(unn.synapses, trainData[0], 0, 0.01)
+  for p in trainData:
+    unn.classify(p)

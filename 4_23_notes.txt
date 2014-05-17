@@ -23,6 +23,8 @@ Check in literature for analysis of SVM for predetermined distribution
 Why is neural net converging to given values? This is tough to figure out
 because we don't learn on examples when the "field" value is good enough
 
+
+
 send Srebro stuff for feedback, but also talk to Rina Foygel in statistics
 
 
@@ -58,3 +60,42 @@ Look up Gatsby Institute, MSR in England - Christopher Bishop is there
 Questions:
 
 should unsupervised per-class neuron sets be disjoint from each other?
+
+initializing synapses to all 0s at first makes most points land in a single
+cluster
+
+better classification rates for 0s and 1s because argmax takes first index
+in case of ties when running classify()? no - tried an experiment
+
+
+in supervised neural net, good examples trigger 10+ neurons, maybe cut off
+at 5+ for unsupervised and start a new cluster otherwise?
+
+for handwritten digits, both for starting synapses at 0s and at randomized
+-1/0/1 values, HEAVY clustering happens after training one cluster per digit
+class, on one example each. "classes" is for starting on -1/0/1, classes2
+for 0s
+
+In [63]: classes
+Out[63]: [17, 0, 1, 3, 35, 13, 148, 11, 109, 663]
+
+In [64]: classes2
+Out[64]: [292, 28, 0, 36, 29, 41, 25, 0, 3, 546]
+
+9s seem to dominate single-point cluster based classification???
+
+is semi supervised learning interesting? it appears that starting clusters with as
+few as 5 points can give them a reasonable success rate, maybe enough to build off
+of with unlabeled data
+
+make transition probability decay as more examples per cluster?
+
+
+Things to try:
+non-disjoint neuron sets per class
+really well separated synth data (nearly all 1s vs nearly all 0s) - see what 
+the net can properly learn on
+
+
+on unsupervised neural net, after training a set of perceptrons on one example,
+how many perceptrons get turned on by a positive/negative example?
