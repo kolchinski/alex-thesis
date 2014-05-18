@@ -30,7 +30,7 @@ class NeuralNet:
 
     neuronsOnPerClass = np.sum(np.dot(self.synapses,x) > self.theta, 1)
     bestClass = np.argmax(neuronsOnPerClass)
-    print neuronsOnPerClass, bestClass
+    #print neuronsOnPerClass, bestClass
     return bestClass
     # reversedMax = np.argmax(neuronsOnPerClass[::-1])
     # return len(neuronsOnPerClass) - 1 - reversedMax
@@ -64,6 +64,7 @@ class NeuralNet:
       # Keep track of how the synapse weights change every 10 iterations
       if t % 10 == 0: synapseHistory.append(np.copy(self.synapses))
       (x,d) = trainData[t % numTrainPts]
+      #print x,d
 
       # We can increment a synapse if it's not maxed out, and vice versa
       canIncrement = self.synapses < 1
@@ -147,6 +148,6 @@ def testNeuralNet(numIterations):
   net.testOnSet(testData)
   net.displayClassMeans()
   return net
-testNeuralNet(5000)
+#testNeuralNet(5000)
 
 
