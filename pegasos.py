@@ -25,11 +25,15 @@ class PegasosSVM:
     self.W = np.zeros((self.C, D)) # SVM weights (perpendicular to separating plane)
     W = self.W
 
+    weightHistory = np.zeros((self.C, T / 10, D))
+
     #Train one-vs-the-rest classifiers one by one
     #This could be vectorized, but it runs quickly as it is
     for c in range(self.C):
       print "\nTraining one-vs-rest SVM for class {}".format(c)
       for t in range(1, T + 1):
+        if (t-1) % 10 == 0: weightHistory[c,(t-1)/10] = self.W[c]
+
         # Every full sweep through the training points, shuffle their order
         if t % S == 0: np.random.shuffle(trainData)
 
@@ -59,6 +63,8 @@ class PegasosSVM:
         maxNorm = 1.0 / np.sqrt(self.l)
         if wNorm > maxNorm: 
           W[c] *= (maxNorm / wNorm)
+
+    return weightHistory
           
   def testOnSet(self, testData):
     classifications = np.zeros((self.C,self.C))

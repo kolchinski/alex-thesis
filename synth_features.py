@@ -73,6 +73,40 @@ def plotSynthDataSynapseHistory(synapseHistory):
   plt.legend(loc=4)
   plt.show()
 
+#only one plot - averaged synapses
+def plotSynapseHistory2Class1Plot(synapseHistory, M, N):
+  numPerceptronsPerClass = synapseHistory[0].shape[1]
+  Ts = np.arange(len(synapseHistory)) * 10
+  denom = 1.0 * numPerceptronsPerClass * N
+  posRegionPosSynapses = [(synapseSet[1] == 1).sum(axis=0)[:N].sum()/denom 
+      for synapseSet in synapseHistory]
+  posRegionNegSynapses = [(synapseSet[1] == -1).sum(axis=0)[:N].sum()/denom 
+      for synapseSet in synapseHistory]
+  posRegionZeroSynapses = [(synapseSet[1] == 0).sum(axis=0)[:N].sum()/denom 
+      for synapseSet in synapseHistory]
+
+  posRegionAvgSynapses = np.array(posRegionPosSynapses) - np.array(posRegionNegSynapses)
+
+  denom = 1.0 * numPerceptronsPerClass * (M-N)
+  bgdRegionPosSynapses = [(synapseSet[1] == 1).sum(axis=0)[N:].sum()/denom 
+      for synapseSet in synapseHistory]
+  bgdRegionNegSynapses = [(synapseSet[1] == -1).sum(axis=0)[N:].sum()/denom 
+      for synapseSet in synapseHistory]
+  bgdRegionZeroSynapses = [(synapseSet[1] == 0).sum(axis=0)[N:].sum()/denom 
+      for synapseSet in synapseHistory]
+
+  bgdRegionAvgSynapses = np.array(bgdRegionPosSynapses) - np.array(bgdRegionNegSynapses)
+
+  plt.figure(figsize=(12,10))
+  plt.title("Convergence of averaged 3MPC in region")
+  plt.xlabel("Iteration number")
+  plt.plot(Ts,posRegionAvgSynapses, 'g-', 
+      label="Positive class: average synapse value over positive region")
+  plt.plot(Ts,bgdRegionAvgSynapses, 'b-', 
+      label="Positive class: average synapse value over background region")
+  plt.legend(loc=0)
+  plt.show()
+
 
 #newer version of function: still only for two-class synth data
 #plots positive-class convergence
@@ -93,6 +127,7 @@ def plotSynapseHistoryTwoClass(synapseHistory, M, N, plotSecondClass = False):
   #    for synapseSet in synapseHistory]
   plt.figure(figsize=(12,10))
   plt.title("Convergence of synapses in high-prob region")
+  plt.xlabel("Iteration number")
   Ts = np.arange(len(synapseHistory)) * 10
   plt.plot(Ts,posRegionPosSynapses, 'g-',
       label="Positive class: Proportion weight 1 synapses for high-prob region")
@@ -134,6 +169,7 @@ def plotSynapseHistoryTwoClass(synapseHistory, M, N, plotSecondClass = False):
       for synapseSet in synapseHistory]
   plt.figure(figsize=(12,10))
   plt.title("Convergence of synapses in background region")
+  plt.xlabel("Iteration number")
   plt.plot(Ts,bgdRegionPosSynapses, 'g-', 
       label="Positive class: Proportion weight 1 synapses for background region")
   plt.plot(Ts,bgdRegionNegSynapses, 'r-', 
@@ -171,6 +207,7 @@ def plotSynapseHistoriesTwoClass(synapseHistory, M, N):
 
   plt.figure(figsize=(12,10))
   plt.title("Convergence of synapses in high-prob region")
+  plt.xlabel("Iteration number")
   denom = 1.0 * N
   
   for i in range(numPerceptronsPerClass):
@@ -194,6 +231,7 @@ def plotSynapseHistoriesTwoClass(synapseHistory, M, N):
 
   plt.figure(figsize=(12,10))
   plt.title("Convergence of synapses in background region")
+  plt.xlabel("Iteration number")
   denom = 1.0 * (M-N)
 
   for i in range(numPerceptronsPerClass):
@@ -226,6 +264,7 @@ def plotSynapseHistoriesThreeRegion(synapseHistory, M, N):
 
   plt.figure(figsize=(12,10))
   plt.title("Convergence of synapses in high-prob region")
+  plt.xlabel("Iteration number")
   denom = 1.0 * N
   
   for i in range(numPerceptronsPerClass):
@@ -249,6 +288,7 @@ def plotSynapseHistoriesThreeRegion(synapseHistory, M, N):
 
   plt.figure(figsize=(12,10))
   plt.title("Convergence of synapses in low-prob region")
+  plt.xlabel("Iteration number")
   denom = 1.0 * N
   
   for i in range(numPerceptronsPerClass):
@@ -273,6 +313,7 @@ def plotSynapseHistoriesThreeRegion(synapseHistory, M, N):
 
   plt.figure(figsize=(12,10))
   plt.title("Convergence of synapses in background region")
+  plt.xlabel("Iteration number")
   denom = 1.0 * (M-2*N)
 
   for i in range(numPerceptronsPerClass):
@@ -302,6 +343,7 @@ def plotSynapseHistoryThreeRegion(synapseHistory, M, N):
 
   plt.figure(figsize=(12,10))
   plt.title("Convergence of synapses in high-prob region")
+  plt.xlabel("Iteration number")
   denom = 1.0 * N * numPerceptronsPerClass
   
   posRegionPosSynapses = [(synapseSet[1] == 1).sum(axis=0)[:N].sum()/denom 
@@ -324,6 +366,7 @@ def plotSynapseHistoryThreeRegion(synapseHistory, M, N):
 
   plt.figure(figsize=(12,10))
   plt.title("Convergence of synapses in low-prob region")
+  plt.xlabel("Iteration number")
   denom = 1.0 * N * numPerceptronsPerClass
   
   lowRegionPosSynapses = [(synapseSet[1] == 1).sum(axis=0)[N:2*N].sum()/denom 
@@ -347,6 +390,7 @@ def plotSynapseHistoryThreeRegion(synapseHistory, M, N):
 
   plt.figure(figsize=(12,10))
   plt.title("Convergence of synapses in background region")
+  plt.xlabel("Iteration number")
   denom = 1.0 * (M - 2*N) * numPerceptronsPerClass
 
   bgdRegionPosSynapses = [(synapseSet[1] == 1).sum(axis=0)[2*N:].sum()/denom 
